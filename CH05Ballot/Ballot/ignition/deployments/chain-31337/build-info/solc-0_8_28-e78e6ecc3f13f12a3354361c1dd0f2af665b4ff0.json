@@ -1,0 +1,39 @@
+{
+  "_format": "hh3-sol-build-info-1",
+  "id": "solc-0_8_28-e78e6ecc3f13f12a3354361c1dd0f2af665b4ff0",
+  "solcVersion": "0.8.28",
+  "solcLongVersion": "0.8.28+commit.7893614a",
+  "userSourceNameMap": {
+    "contracts/SleepyCatCoin.sol": "project/contracts/SleepyCatCoin.sol"
+  },
+  "input": {
+    "language": "Solidity",
+    "settings": {
+      "evmVersion": "cancun",
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "outputSelection": {
+        "*": {
+          "": [
+            "ast"
+          ],
+          "*": [
+            "abi",
+            "evm.bytecode",
+            "evm.deployedBytecode",
+            "evm.methodIdentifiers",
+            "metadata"
+          ]
+        }
+      },
+      "remappings": []
+    },
+    "sources": {
+      "project/contracts/SleepyCatCoin.sol": {
+        "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.26;\n\ninterface IERC20 {\n    function totalSupply() external view returns (uint256);\n    function balanceOf(address account) external view returns (uint256);\n    function transfer(address recipient, uint256 amount) external returns (bool);\n    function allowance(address owner, address spender) external view returns (uint256);\n    function approve(address spender, uint256 amount) external returns (bool);\n    function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);\n}\n\ncontract SleepyCatCoin is IERC20 {\n    string public name;\n    string public symbol;\n    uint8 public decimals;\n    uint256 public totalSupply;\n    address public owner;\n\n    mapping(address => uint256) public balanceOf;\n    mapping(address => mapping(address => uint256)) public allowance;\n\n    constructor(uint256 _initialSupply) {\n        name = \"SleepyCatCoin\";\n        symbol = \"SCC\";\n        decimals = 18;\n\n        totalSupply = _initialSupply * 10 ** uint256(decimals);\n        balanceOf[msg.sender] = totalSupply;\n\n        owner = msg.sender;\n    }\n\n    modifier onlyOwner() {\n        require(msg.sender == owner, \"Only contract owner can mint\");\n        _;\n    }\n\n    event Transfer(address indexed from, address indexed to, uint256 value);\n    event Approval(address indexed owner, address indexed spender, uint256 value);\n\n    function transfer(address _to, uint256 _value) public returns (bool success) {\n        require(_to != address(0), \"Invalid address\");\n        require(balanceOf[msg.sender] >= _value, \"Insufficient balance\");\n\n        balanceOf[msg.sender] -= _value;\n        balanceOf[_to] += _value;\n\n        emit Transfer(msg.sender, _to, _value);\n        return true;\n    }\n\n    function approve(address _spender, uint256 _value) public returns (bool success) {\n        require(_spender != address(0), \"Invalid address\");\n\n        allowance[msg.sender][_spender] = _value;\n\n        emit Approval(msg.sender, _spender, _value);\n        return true;\n    }\n\n    function transferFrom(address _from, address _to, uint256 _value) public returns (bool success) {\n        require(_to != address(0), \"Invalid address\");\n        require(balanceOf[_from] >= _value, \"Insufficient balance\");\n        require(allowance[_from][msg.sender] >= _value, \"Allowance exceeded\");\n\n        balanceOf[_from] -= _value;\n        balanceOf[_to] += _value;\n        allowance[_from][msg.sender] -= _value;\n\n        emit Transfer(_from, _to, _value);\n        return true;\n    }\n\n    function mint(address account, uint256 amount) public onlyOwner {\n        require(account != address(0), \"Cannot mint to zero address\");\n\n        uint256 scaled = amount * 10 ** uint256(decimals);\n        totalSupply += scaled;\n        balanceOf[account] += scaled;\n\n        emit Transfer(address(0), account, scaled);\n    }\n}"
+      }
+    }
+  }
+}
